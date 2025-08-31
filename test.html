@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>江南电缆数据转化工具 - 测试页面</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            padding: 50px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .container {
+            background: white;
+            color: #333;
+            padding: 40px;
+            border-radius: 10px;
+            max-width: 600px;
+            margin: 0 auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+        h1 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        .status {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 5px;
+        }
+        .success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .info {
+            background: #d1ecf1;
+            color: #0c5460;
+            border: 1px solid #bee5eb;
+        }
+        a {
+            color: #3498db;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🔧 江南电缆数据转化工具</h1>
+        
+        <div class="status success">
+            <h3>✅ 部署测试页面</h3>
+            <p>如果你能看到这个页面，说明GitHub Pages部署成功！</p>
+        </div>
+        
+        <div class="status info">
+            <h3>📋 系统信息</h3>
+            <p><strong>当前时间：</strong><span id="currentTime"></span></p>
+            <p><strong>访问URL：</strong><span id="currentUrl"></span></p>
+            <p><strong>用户代理：</strong><span id="userAgent"></span></p>
+        </div>
+        
+        <div class="status">
+            <h3>🚀 功能测试</h3>
+            <p>如果页面加载正常，请点击下方链接访问完整功能：</p>
+            <p><a href="index.html">进入主工具页面</a></p>
+        </div>
+        
+        <div class="status error">
+            <h3>⚠️ 故障排除</h3>
+            <p>如果看到404错误，请检查：</p>
+            <ul style="text-align: left;">
+                <li>GitHub仓库设置中是否启用了Pages</li>
+                <li>部署分支是否正确（main或master）</li>
+                <li>文件是否在仓库根目录</li>
+                <li>是否等待了3-5分钟部署时间</li>
+            </ul>
+        </div>
+        
+        <footer style="margin-top: 30px; color: #666; font-size: 14px;">
+            <p>江南电缆数据转化工具 v1.0 | 技术支持：support@jndl.com</p>
+        </footer>
+    </div>
+
+    <script>
+        // 显示当前时间
+        document.getElementById('currentTime').textContent = new Date().toLocaleString('zh-CN');
+        document.getElementById('currentUrl').textContent = window.location.href;
+        document.getElementById('userAgent').textContent = navigator.userAgent.substring(0, 50) + '...';
+        
+        // 自动跳转到主页面（5秒后）
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 5000);
+    </script>
+</body>
+</html>
