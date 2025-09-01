@@ -103,13 +103,13 @@ async function processData() {
         hideError();
         
         // 读取Excel文件
-        const data = await readExcelFile(currentFile);
+        const result = await readExcelFile(currentFile);
         
         // 解析和转换数据
-        processedData = transformData(data);
+        processedData = transformData(result.data);
         
         // 显示结果
-        displayResults(processedData);
+        displayResults(processedData, result.sheetName);
         
     } catch (err) {
         showError('处理文件时发生错误：' + err.message);
@@ -129,27 +129,45 @@ function readExcelFile(file) {
                 const data = new Uint8Array(e.target.result);
                 const workbook = XLSX.read(data, { type: 'array' });
                 
-                // 检查是否有Sheet1
-                if (!workbook.SheetNames.includes('Sheet1')) {
-                    reject(new Error('文件中未找到Sheet1工作表'));
+                // 智能选择工作表
+                let targetSheetName;
+                if (workbook.SheetNames.length === 0) {
+                    reject(new Error('Excel文件中没有任何工作表'));
                     return;
                 }
                 
-                // 读取Sheet1数据
-                const worksheet = workbook.Sheets['Sheet1'];
+                // 优先使用Sheet1，如果没有就使用第一个工作表
+                if (workbook.SheetNames.includes('Sheet1')) {
+                    targetSheetName = 'Sheet1';
+                } else {
+                    targetSheetName = workbook.SheetNames[0];
+                    // 如果有多个工作表，在控制台提示用户
+                    if (workbook.SheetNames.length > 1) {
+                        console.log(`文件包含多个工作表：${workbook.SheetNames.join(', ')}`);
+                        console.log(`未找到Sheet1，自动使用第一个工作表：${targetSheetName}`);
+                    } else {
+                        console.log(`自动使用工作表：${targetSheetName}`);
+                    }
+                }
+                
+                // 读取目标工作表数据
+                const worksheet = workbook.Sheets[targetSheetName];
                 const jsonData = XLSX.utils.sheet_to_json(worksheet, { 
                     header: 1,
                     defval: '' 
                 });
                 
-                resolve(jsonData);
+                resolve({
+                    data: jsonData,
+                    sheetName: targetSheetName
+                });
             } catch (err) {
-                reject(new Error('无法读取Excel文件：' + err.message));
+                reject(new Error(`无法读取Excel文件：${err.message}。请确保文件格式正确且未损坏。`));
             }
         };
         
         reader.onerror = () => {
-            reject(new Error('文件读取失败'));
+            reject(new Error('文件读取失败。请检查文件是否完整或尝试重新选择文件。'));
         };
         
         reader.readAsArrayBuffer(file);
@@ -159,7 +177,7 @@ function readExcelFile(file) {
 // 转换数据
 function transformData(rawData) {
     if (rawData.length < 2) {
-        throw new Error('数据不足，请检查Excel文件格式');
+        throw new Error('Excel文件数据不足。请确保文件包含表头和至少一行数据。');
     }
     
     const results = [];
@@ -183,7 +201,11 @@ function transformData(rawData) {
     }
     
     if (results.length === 0) {
-        throw new Error('未找到有效的电缆规格数据');
+        throw new Error(`未找到有效的电缆规格数据。请确保：
+1. 数据从第2行开始（第1行为表头）
+2. 第6列包含电缆规格（格式：ZC-电缆类型-电压等级-规格）
+3. 电缆规格包含支持的电压格式（如：0.6/1kV、6/10kV、450/750V等）
+4. 当前使用的工作表：${rawData.length > 0 ? '有数据' : '无数据'}`);
     }
     
     // 不排序！保持原始顺序输出26条记录
@@ -261,8 +283,9 @@ function normalizeSpecification(spec) {
 }
 
 // 显示结果
-function displayResults(data) {
-    resultInfo.textContent = `共处理 ${data.length} 条电缆规格记录，转换完成！`;
+function displayResults(data, sheetName = 'Sheet1') {
+    const sheetInfo = sheetName !== 'Sheet1' ? ` (使用工作表: ${sheetName})` : '';
+    resultInfo.textContent = `共处理 ${data.length} 条电缆规格记录，转换完成！${sheetInfo}`;
     
     // 统计信息
     const cableTypes = [...new Set(data.map(item => item.cableType))];
